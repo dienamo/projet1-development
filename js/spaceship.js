@@ -1,35 +1,47 @@
 class spaceShip {
 
     constructor() {
-        this.x = 500;
-        this.y = 800; 
-        this.speed = 5;
-        
-        this.bulletArray = [];
+        this.x = canvas.width / 2;
+        this.y = canvas.height - 300; 
+        this.w = 250;
+        this.h = 250;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.speed = 2;
+        this.friction = 0.98;
+        this.keys = [];
+        this.playerBulletArray = [];
+        const img = document.createElement('img');
+        this.img = img;
+        img.src = "./images/falcon.png"
     }
 
     shoot() {
-        var bullet = new weapon(vaisseauMere.x + 25 , vaisseauMere.y);
-        this.bulletArray.push(bullet);
+        var bullet = new weapon(vaisseauMere.x + 100 , vaisseauMere.y);
+        this.playerBulletArray.push(bullet);
     }
 
     draw() {
-        ctx.fillRect(this.x , this.y , 50, 50);
+        ctx.drawImage(this.img,this.x , this.y , this.w, this.h);
     }
  
-    moveForward() {
-        return this.y-=15
+    newPos() {
+        this.x += this.speedX;
+        this.y += this.speedY;
     }
+    // moveForward() {
+    //     this.speedY += 1;
+    // }
 
-    moveBackward() {
-        return this.y+=15
-    }
+    // moveBackward() {
+    //     speedY -= 1;
+    // }
 
-    moveRight() {
-        return this.x+=15
-    }
+    // moveRight() {
+    //     this.speedX += 1;
+    // }
 
-    moveLeft() {
-        return this.x-=15
-    }
+    // moveLeft() {
+    //     this.speedX -= 1;
+    // }
 }
