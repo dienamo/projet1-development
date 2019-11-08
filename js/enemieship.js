@@ -2,8 +2,8 @@ class enemieship {
     constructor() {
         this.x = Math.floor(Math.random() * canvas.width) + 100;
         this.y = 0;
-        this.w = 150;
-        this.h = 150;
+        this.w = 80;
+        this.h = 80;
         this.speed = 1;
         const img = document.createElement('img');
         this.img = img;

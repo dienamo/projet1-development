@@ -1,20 +1,16 @@
 var canvas = document.getElementById("canvas")
 var ctx = canvas.getContext("2d") ;
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-window.addEventListener('resize' , function(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-})
+canvas.width = 1270;
+canvas.height = 570;
 
 function scoreBoard() {
     ctx.fillStyle = 'white';
-    ctx.font = '100px Arial';
-    ctx.fillText(`Score : ${score}`, 3000 ,  100);
-    ctx.fillText(`Health : ${health}` , 3000 , 200)
+    ctx.font = '20px Arial';
+    ctx.fillText(`Score : ${score}`, 1100 ,  50);
+    ctx.fillText(`Health : ${health}` , 1100 , 100);
 }
 
-var health = 3;
+health = 0;
 
 var score = 0;
 
@@ -23,6 +19,18 @@ var frames = 0;
 var vaisseauMere = new spaceShip();
 
 ennemiesArray = [];
+
+healthArray = [];
+
+function newHealth() {
+    health1 = new HealthIcon(100 , 200);
+    health2 = new HealthIcon(150 , 200);
+    health3 = new HealthIcon(200 , 200);
+    console.log(healthArray)
+    healthArray.push(health1 , health2 , health3)
+}
+
+newHealth()
 
 function keysMove() {
     if (vaisseauMere.keys[38]) {
@@ -86,6 +94,7 @@ function handleCollisions() {
             ennemiesArray.splice(i , 1);
             console.log("collision");
             health --;
+            healthArray.splice(0 , 1);
         }
     })
     ennemiesArray.forEach(function(enemy , i) {
@@ -93,13 +102,11 @@ function handleCollisions() {
             if(detectCollision(vaisseauMere , bullet)){
                 enemy.enemiesBulletArray.splice(i , 1);
                 health --;
+                healthArray.splice(0 , 1)
             }   
         })   
     })
 }
-
-
-
 
 /*
 ##     ## ########  ########     ###    ######## ######## 
@@ -111,9 +118,14 @@ function handleCollisions() {
  #######  ##        ########  ##     ##    ##    ######## 
 */
 function update() {
+
     frames++;
     
     ctx.clearRect(0 , 0 , canvas.width , canvas.height);
+
+    healthArray.forEach(health => {
+        health.drawHealth();
+    });
 
     vaisseauMere.playerBulletArray.forEach(bullet => {
         bullet.draw();
@@ -145,8 +157,6 @@ function update() {
         ennemie.moveDown();
         
     });
-
-    vaisseauMere.newPos();
 
     keysMove();
 
