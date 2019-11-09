@@ -1,33 +1,78 @@
 var canvas = document.getElementById("canvas")
 var ctx = canvas.getContext("2d") ;
+var body = document.querySelector('body');
 canvas.width = 1270;
 canvas.height = 570;
 
-function scoreBoard() {
+function menu() {
+    ctx.clearRect(0 , 0 , canvas.width , canvas.height);
     ctx.fillStyle = 'white';
-    ctx.font = '20px Arial';
-    ctx.fillText(`Score : ${score}`, 1100 ,  50);
-    ctx.fillText(`Health : ${health}` , 1100 , 100);
+    ctx.font = '36px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Help me, Obi-Wan Kenobi. You are my only hope', canvas.width / 2, canvas.height / 4);
+    ctx.font = '24px Arial';
+    ctx.fillText('Click to Start', canvas.width / 2, canvas.height / 2);
+    ctx.font = '18px Arial';
+    ctx.fillText('Up/Down/Right/Left keys to move, Space to shoot.', canvas.width / 2, (canvas.height / 4) * 3);
+    document.querySelector("body").addEventListener('click', startGame);
+  }
+
+  function startGame() {
+    //
+    // reset
+    //
+    score = 0;
+
+    ennemiesArray = [];
+
+    newHealth();
+
+    gameOver = false;
+    
+    // newEnnemies();
+    
+    requestAnimationFrame(update);
 }
 
-health = 0;
+function scoreBoard() {
+    ctx.fillStyle = 'white';
+    ctx.font = '36px STARWARS';
+    ctx.fillText(`Score : ${score}`, 1050 , 50);
+    ctx.fillText("Health :" , 1050 , 100);
+}
+
+function showGameOver() {
+    ctx.clearRect(0 , 0 , canvas.width , canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.font = '36px STARWARS';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 4);
+    ctx.font = '24px STARWARS';
+    ctx.fillText('Click to restart', canvas.width / 2, canvas.height / 2);
+    document.querySelector("body").addEventListener('click', startGame);
+  }
 
 var score = 0;
 
 var frames = 0;
 
+var gameOver = false;
+
 var vaisseauMere = new spaceShip();
 
-ennemiesArray = [];
+var ennemiesArray = [];
 
-healthArray = [];
+var healthArray = [];
+
+var enemiesFrequence = 300;
+
+
 
 function newHealth() {
-    health1 = new HealthIcon(100 , 200);
-    health2 = new HealthIcon(150 , 200);
-    health3 = new HealthIcon(200 , 200);
-    console.log(healthArray)
-    healthArray.push(health1 , health2 , health3)
+    health1 = new HealthIcon(1120 , 70);
+    health2 = new HealthIcon(1170 , 70);
+    health3 = new HealthIcon(1220 , 70);
+    healthArray.push(health3 , health2 , health1)
 }
 
 newHealth()
@@ -59,6 +104,17 @@ function keysMove() {
     vaisseauMere.y += vaisseauMere.speedY;
     vaisseauMere.speedX *= vaisseauMere.friction;
     vaisseauMere.x += vaisseauMere.speedX;
+
+    if (vaisseauMere.x >= canvas.width - 100) {
+        vaisseauMere.x = canvas.width - 100;
+    } else if (vaisseauMere.x <= 5) {
+        vaisseauMere.x = 5;
+    }
+    if (vaisseauMere.y >= canvas.height - 100) {
+        vaisseauMere.y = canvas.height - 100;
+    } else if (vaisseauMere.y <= 5) {
+        vaisseauMere.y = 5;
+    }
 }
 
 function explode() {
@@ -67,12 +123,20 @@ function explode() {
     ctx.drawImage(img1, 400 , 400 , 150 , 150);
 }
 
-function newEnnemies() {
+// function newEnnemies() {
+//     setInterval(function() {
+//         enemie = new enemieship();
+//         ennemiesArray.push(enemie);
+//     }, enemiesFrequence)
+// }
+
+function moreEnnemies() {
     setInterval(function() {
-        enemie = new enemieship();
-        ennemiesArray.push(enemie);
-    },5000)
+        return enemiesFrequence -= 60;
+    }, 30000)
 }
+
+moreEnnemies();
 
 function detectCollision(a , b) {
     return a.x < b.x + b.w && 
@@ -92,17 +156,20 @@ function handleCollisions() {
     ennemiesArray.forEach(function(enemy , i) {
         if(detectCollision(enemy , vaisseauMere)){
             ennemiesArray.splice(i , 1);
-            console.log("collision");
-            health --;
-            healthArray.splice(0 , 1);
+            healthArray.pop();
+            if(healthArray.length === 0){
+                gameOver = true;
+            }
         }
     })
     ennemiesArray.forEach(function(enemy , i) {
         enemy.enemiesBulletArray.forEach(function(bullet , i) {
             if(detectCollision(vaisseauMere , bullet)){
                 enemy.enemiesBulletArray.splice(i , 1);
-                health --;
-                healthArray.splice(0 , 1)
+                healthArray.pop();
+                if(healthArray.length === 0){
+                gameOver = true;
+            }
             }   
         })   
     })
@@ -120,9 +187,8 @@ function handleCollisions() {
 function update() {
 
     frames++;
-    
     ctx.clearRect(0 , 0 , canvas.width , canvas.height);
-
+    vaisseauMere.sound.play();
     healthArray.forEach(health => {
         health.drawHealth();
     });
@@ -133,28 +199,52 @@ function update() {
         bullet.clean();
     });
 
+
+    if (frames % enemiesFrequence === 0) {
+        enemie = new enemieship();
+        ennemiesArray.push(enemie);
+    }
+
     ennemiesArray.forEach(ennemie => {
         ennemie.draw();
 
-        if (frames % Math.floor(Math.random()*200) === 0) {
+        if (frames % Math.floor(Math.random()*300) === 0) {
             ennemie.moveLeft();
         }
 
-        if (frames % Math.floor(Math.random()*200) === 0) {
+        if (frames % Math.floor(Math.random()*300) === 0) {
             ennemie.moveRight();
         }
 
-        if (frames % Math.floor(Math.random()*1500) === 0) {
+        if (frames % Math.floor(Math.random()*120) === 0) {
             ennemie.shoot();
         }
+
+        if (frames % Math.floor(Math.random()*500) === 0) {
+            ennemie.moveDown();
+        }
+
+
+        ennemie.speedY *= ennemie.friction;
+        ennemie.y += ennemie.speedY;
+        ennemie.speedX *= ennemie.friction;
+        ennemie.x += ennemie.speedX;
+
+        if (ennemie.x >= canvas.width - 50) {
+            ennemie.x = canvas.width - 50;
+        } else if (ennemie.x <= 50) {
+            ennemie.x = 50;
+        }
+    
+        // if (ennemie.y > canvas.height) {
+            
+        // } 
 
         ennemie.enemiesBulletArray.forEach(bullet => {
             bullet.draw();
             bullet.moveDown();
             bullet.clean();
         });
-        
-        ennemie.moveDown();
         
     });
 
@@ -166,7 +256,13 @@ function update() {
     
     scoreBoard();
     
-    requestAnimationFrame(update);
+    if(!gameOver){
+        requestAnimationFrame(update);
+    } 
+    else{
+        showGameOver();
+    }
+
 }
 
 /*
@@ -181,7 +277,7 @@ function update() {
 document.onkeydown = function(e) {
     if(e.keyCode === 38) {
         //vaisseauMere.moveForward();
-        vaisseauMere.speedY -= 1
+        vaisseauMere.speedY -= 1;
     }
     else if(e.keyCode === 40) {
         //vaisseauMere.moveBackward();
@@ -207,8 +303,6 @@ document.body.addEventListener("keyup", function (e) {
     vaisseauMere.keys[e.keyCode] = false;
 });
 
-
-
 /*
 .##.....##....###....####.##....##
 .###...###...##.##....##..###...##
@@ -219,5 +313,5 @@ document.body.addEventListener("keyup", function (e) {
 .##.....##.##.....##.####.##....##
 */
 
-requestAnimationFrame(update);
-newEnnemies();
+menu();
+
