@@ -13,7 +13,7 @@ class spaceShip {
         this.playerBulletArray = [];
         const img = document.createElement('img');
         this.img = img;
-        img.src = "./images/falcon.png"
+        img.src = "./images/falcon.PNG"
         const healthimg = document.createElement('img');
         this.healthimg = healthimg;
         healthimg.src = "./images/health.png"
